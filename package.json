@@ -1,7 +1,7 @@
 {
   "name": "my-app",
   "version": "0.0.0",
-  "main":, "server.js",
+  "main": "server.js",
   "scripts": {
     "ng": "ng",
     "start": "node server.js",
