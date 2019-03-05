@@ -12,7 +12,7 @@ COPY . .
 
 ENV PORT=8080
 
-RUN npm install --only=production && \
+RUN npm install && \
     npm run build
 
 WORKDIR /usr/src/app/server
