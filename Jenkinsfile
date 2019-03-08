@@ -119,7 +119,8 @@ node
    {
         stage('Unit Testing')
    	    {
-            sh 'npm run test'
+            sh ' $(npm bin)/ng test --single-run --browsers Chrome_no_sandbox'
+            junit "test-results.xml"
    	    }
    }
    
