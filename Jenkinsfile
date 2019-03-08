@@ -93,7 +93,7 @@ def deployApp(projectName,msName){
       args: '${computer.jnlpmac} ${computer.name}'
     )])
 {*/
-node 
+node('nodejs8') 
 {
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
