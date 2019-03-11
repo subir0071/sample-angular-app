@@ -167,6 +167,7 @@ node
 
    stage("Functional Testing")
    {
+        sh 'npm install -g protractor'
         sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
    }
   }
