@@ -1,5 +1,5 @@
 def readProperties(){
-	def properties_file_path = "${workspace}" + "/properties.yml"
+	def properties_file_path = "${workspace}" + "@script/properties.yml"
 	def property = readYaml file: properties_file_path
 
     env.APP_NAME = property.APP_NAME
@@ -93,7 +93,7 @@ def deployApp(projectName,msName){
       args: '${computer.jnlpmac} ${computer.name}'
     )])
 {*/
-node('nodejs8')
+node
 {
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
@@ -105,6 +105,7 @@ node('nodejs8')
         firstTimeProdDeployment("${APP_NAME}-dev", "${APP_NAME}-prod", "${MS_NAME}")
    }
    
+  node('nodejs8'){
    stage('Checkout')
    {
        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
@@ -138,7 +139,7 @@ node('nodejs8')
             sh 'npm run lint'
         }
    }
-	
+  }
    stage('Dev - Build Application')
    {
        buildApp("${APP_NAME}-dev", "${MS_NAME}")
