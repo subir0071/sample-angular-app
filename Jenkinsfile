@@ -125,6 +125,7 @@ node
         stage('Unit Testing')
    	    {
             sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
+            sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor-ci.conf.js'
    	    }
    }
   
