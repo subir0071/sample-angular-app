@@ -84,15 +84,19 @@ def deployApp(projectName,msName){
 }
 
 
-/*podTemplate(cloud:'openshift',label: 'selenium', 
-  containers: [
-    containerTemplate(
-      name: 'jnlp',
-      image: 'cloudbees/jnlp-slave-with-java-build-tools',
-      alwaysPullImage: true,
-      args: '${computer.jnlpmac} ${computer.name}'
-    )])
-{*/
+podTemplate(containers: [
+						containerTemplate(
+								alwaysPullImage: false, 
+								args: '${computer.jnlpmac} ${computer.name}', 
+								image: 'docker.io/petenorth/nodejs8-openshift-slave',  
+								name: 'jnlp',  
+								privileged: false, 
+								ttyEnabled: true, 
+								workingDir: '/tmp')
+						], 
+			label: 'nodejs8', 
+			name: 'nodejs8', 
+			serviceAccount: 'jenkins'{
 node
 {
    def NODEJS_HOME = tool "NODE_PATH"
@@ -187,4 +191,4 @@ node
    }	
   
 }
-/*}*/
+}
