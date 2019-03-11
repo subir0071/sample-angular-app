@@ -107,6 +107,7 @@ node
         firstTimeDevDeployment("${APP_NAME}-dev", "${MS_NAME}")
         firstTimeTestDeployment("${APP_NAME}-dev", "${APP_NAME}-test", "${MS_NAME}")
         firstTimeProdDeployment("${APP_NAME}-dev", "${APP_NAME}-prod", "${MS_NAME}")
+        sh 'protractor --version'
    }
    
   node('nodejs8'){
