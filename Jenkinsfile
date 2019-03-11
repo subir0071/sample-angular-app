@@ -167,7 +167,9 @@ node
 
    stage("Functional Testing")
    {
-        sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
+        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
+        //sh 'npm install'
+        sh 'ng e2e -- --protractor-config=e2e/protractor.conf.js'
    }
    
    /*stage("Load Testing")
