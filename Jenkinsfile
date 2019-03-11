@@ -96,7 +96,7 @@ podTemplate(containers: [
 						], 
 			label: 'nodejs8', 
 			name: 'nodejs8', 
-			serviceAccount: 'jenkins'{
+			serviceAccount: 'jenkins'){
 node
 {
    def NODEJS_HOME = tool "NODE_PATH"
