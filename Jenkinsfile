@@ -107,7 +107,7 @@ node
         firstTimeDevDeployment("${APP_NAME}-dev", "${MS_NAME}")
         firstTimeTestDeployment("${APP_NAME}-dev", "${APP_NAME}-test", "${MS_NAME}")
         firstTimeProdDeployment("${APP_NAME}-dev", "${APP_NAME}-prod", "${MS_NAME}")
-        sh 'protractor --version'
+        
    }
    
   node('nodejs8'){
@@ -119,6 +119,7 @@ node
    stage('Initial Setup')
    {
        sh 'npm install'
+       sh 'protractor --version'
    }
    
    if(env.UNIT_TESTING == 'True')
@@ -168,7 +169,6 @@ node
 
    stage("Functional Testing")
    {
-        sh 'npm install -g protractor'
         sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
    }
   }
