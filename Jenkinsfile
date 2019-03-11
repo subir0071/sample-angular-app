@@ -122,7 +122,8 @@ node
    	    {
             checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
             sh 'npm install'
-            sh ' $(npm bin)/ng test --single-run --browsers Chrome_no_sandbox'
+            //sh ' $(npm bin)/ng test --single-run --browsers Chrome_no_sandbox'
+            sh ' $(npm bin)/ng test --browsers Chrome_no_sandbox'
             junit "test-results.xml"
    	    }
    }
