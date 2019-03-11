@@ -165,12 +165,12 @@ node
        deployApp("${APP_NAME}-test", "${MS_NAME}")
    }
 
-   /*stage("Functional Testing")
+   stage("Functional Testing")
    {
-        sh 'python functionalTest.py'
+        sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
    }
    
-   stage("Load Testing")
+   /*stage("Load Testing")
    {
         sh 'artillery run -o load.json perfTest.yml'
         //sh 'artillery report load.json'  
