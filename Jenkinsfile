@@ -93,7 +93,7 @@ def deployApp(projectName,msName){
       args: '${computer.jnlpmac} ${computer.name}'
     )])
 {*/
-node
+node('nodejs8')
 {
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
@@ -115,27 +115,21 @@ node
        sh 'npm install'
    }
    
-  node('nodejs8'){
    if(env.UNIT_TESTING == 'True')
    {
         stage('Unit Testing')
    	    {
-            checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
-            sh 'npm install'
-            //sh ' $(npm bin)/ng test --single-run --browsers Chrome_no_sandbox'
-            sh ' $(npm bin)/ng test -- --no-watch --no-progress --code-coverage --browsers Chrome_no_sandbox'
-            sh 'sleep 150'
-            junit "test-results.xml"
+            sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
    	    }
    }
-  }
-   /*if(env.CODE_COVERAGE == 'True')
+  
+   if(env.CODE_COVERAGE == 'True')
    {
         stage('Code Coverage')
    	    {	
-	        sh 'npm run coverage'
+	        sh ' $(npm bin)/ng test -- --no-watch --no-progress --code-coverage --browsers Chrome_no_sandbox'
    	    }
-   }*/
+   }
    
    if(env.CODE_QUALITY == 'True')
    {
