@@ -84,7 +84,7 @@ def deployApp(projectName,msName){
 }
 
 
-podTemplate(containers: [
+podTemplate(cloud:'openshift',containers: [
 						containerTemplate(
 								alwaysPullImage: false, 
 								args: '${computer.jnlpmac} ${computer.name}', 
