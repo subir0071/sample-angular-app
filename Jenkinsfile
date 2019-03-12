@@ -94,7 +94,7 @@ podTemplate(
       containerTemplate(name: 'selenium', image: 'selenium/standalone-chrome:3.14', command: '', ttyEnabled: false, ports: [portMapping(containerPort: 4444)]),
     ]
   ){
-node ('jenkins-pipeline')
+node
 {
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
@@ -107,7 +107,7 @@ node ('jenkins-pipeline')
         
    }
    
-  
+  node ('jenkins-pipeline'){
    stage('Checkout')
    {
        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
@@ -188,6 +188,6 @@ node ('jenkins-pipeline')
    {
        deployApp("${APP_NAME}-prod", "${MS_NAME}")
    }	
-  
+  } 
 }
 }
