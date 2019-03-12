@@ -11,7 +11,8 @@ exports.config = {
   capabilities: {
     'browserName': 'chrome'
   },
-  directConnect: true,
+  directConnect: false,
+  seleniumAddress: 'http://localhost:4444/wd/hub',
   baseUrl: 'http://localhost:4200/',
   framework: 'jasmine',
   jasmineNodeOpts: {
