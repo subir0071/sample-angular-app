@@ -84,20 +84,16 @@ def deployApp(projectName,msName){
 }
 
 
-podTemplate(cloud:'openshift',containers: [
-						containerTemplate(
-								alwaysPullImage: false, 
-								args: '${computer.jnlpmac} ${computer.name}', 
-								image: 'docker.io/petenorth/nodejs8-openshift-slave',  
-								name: 'jnlp',  
-								privileged: false, 
-								ttyEnabled: true, 
-								workingDir: '/tmp')
-						], 
-			label: 'nodejs8', 
-			name: 'nodejs8', 
-			serviceAccount: 'jenkins'){
-node
+podTemplate(
+    label: 'jenkins-pipeline', 
+    inheritFrom: 'default',
+    containers: [
+      containerTemplate(name: 'docker', image: 'docker:18.06', command: 'cat', ttyEnabled: true),
+      containerTemplate(name: 'chrome', image: 'garunski/alpine-chrome:latest', command: 'cat', ttyEnabled: true),
+      containerTemplate(name: 'selenium', image: 'selenium/standalone-chrome:3.14', command: '', ttyEnabled: false, ports: [portMapping(containerPort: 4444)]),
+    ]
+  ){
+node ('jenkins-pipeline')
 {
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
@@ -110,16 +106,15 @@ node
         
    }
    
-  node('nodejs8'){
+  
    stage('Checkout')
    {
        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
    }
-
+  container ('chrome'){
    stage('Initial Setup')
    {
        sh 'npm install'
-       sh 'protractor --version'
    }
    
    if(env.UNIT_TESTING == 'True')
