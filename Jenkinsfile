@@ -87,7 +87,7 @@ def deployApp(projectName,msName){
 podTemplate(
     cloud:'openshift',
     label: 'jenkins-pipeline',
-    serviceAccount: 'jenkins'
+    serviceAccount: 'jenkins',
     containers: [
       containerTemplate(name: 'docker', image: 'docker:18.06', command: 'cat', ttyEnabled: true),
       containerTemplate(name: 'chrome', image: 'garunski/alpine-chrome:latest', command: 'cat', ttyEnabled: true),
