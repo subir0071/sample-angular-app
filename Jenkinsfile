@@ -85,12 +85,12 @@ def deployApp(projectName,msName){
 
 podTemplate(cloud: 'openshift', 
 			containers: [
-				containerTemplate(alwaysPullImage: false, command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true, workingDir: '/var/lib/jenkins/jobs/angular-demo-cicd/jobs/angular-demo-cicd-angular-demo-pipeline/workspace'), containerTemplate(alwaysPullImage: false, command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', privileged: false, ttyEnabled: true, workingDir: '/var/lib/jenkins/jobs/angular-demo-cicd/jobs/angular-demo-cicd-angular-demo-pipeline/workspace'), 
-				containerTemplate(alwaysPullImage: false, command: 'cat', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444)], privileged: false, ttyEnabled: false, workingDir: '/var/lib/jenkins/jobs/angular-demo-cicd/jobs/angular-demo-cicd-angular-demo-pipeline/workspace')],
+				containerTemplate(alwaysPullImage: false, command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true, workingDir: '/tmp'), containerTemplate(alwaysPullImage: false, command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', privileged: false, ttyEnabled: true, workingDir: '/tmp'), 
+				containerTemplate(alwaysPullImage: false, command: 'cat', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444)], privileged: false, ttyEnabled: false, workingDir: '/tmp')],
 				label: 'jenkins-pipeline', 
 				name: 'jenkins-pipeline', 
 				serviceAccount: 'jenkins', 
-				volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '/var/lib/jenkins/jobs/angular-demo-cicd/jobs/angular-demo-cicd-angular-demo-pipeline/workspace', readOnly: false)], 
+				volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '/home/jenkins', readOnly: false)], 
 				workspaceVolume: emptyDirWorkspaceVolume(false)) {
    
 node
