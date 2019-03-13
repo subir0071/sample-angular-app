@@ -107,16 +107,19 @@ node
         
    }
    
-  node ('jenkins-pipeline'){
+  
    stage('Checkout')
    {
        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
+     env.work = "${workspace}"
    }
+  node ('jenkins-pipeline'){
   container ('chrome'){
    stage('Initial Setup')
    {
        sh 'npm install'
        sh 'pwd'
+       echo env.work
    }
    
    if(env.UNIT_TESTING == 'True')
