@@ -90,7 +90,7 @@ podTemplate(cloud: 'openshift',
 				label: 'jenkins-pipeline', 
 				name: 'jenkins-pipeline', 
 				serviceAccount: 'jenkins', 
-				volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '${workspace}', readOnly: false)], 
+				volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '/var/lib/jenkins/jobs/angular-demo-cicd/jobs/angular-demo-cicd-angular-demo-pipeline/workspace', readOnly: false)], 
 				workspaceVolume: emptyDirWorkspaceVolume(false)) {
    
 node
