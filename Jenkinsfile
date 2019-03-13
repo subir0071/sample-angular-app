@@ -85,13 +85,13 @@ def deployApp(projectName,msName){
 
 podTemplate(cloud: 'openshift', 
 			containers: [
-				containerTemplate(command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true), 
-        containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', ttyEnabled: true), 
-				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false)],
+				containerTemplate(command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true,workingDir:'/var/lib/jenkins'), 
+        containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', ttyEnabled: true,workingDir:'/var/lib/jenkins'), 
+				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/var/lib/jenkins')],
 				label: 'jenkins-pipeline', 
 				name: 'jenkins-pipeline', 
 				serviceAccount: 'jenkins', 
-				volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '/home/jenkins', readOnly: false)] 
+				volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '/var/lib/jenkins', readOnly: false)] 
 				) {
    
 node
@@ -111,21 +111,24 @@ node
    stage('Checkout')
    {
        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
-     env.work = "${workspace}"
+     env.WORKSPACE = "${workspace}"
    }
   node ('jenkins-pipeline'){
   container ('chrome'){
    stage('Initial Setup')
    {
+     sh 'cd "${WORKSPACE}"'
+     sh 'pwd'
        sh 'npm install'
        sh 'pwd'
-       echo env.work
    }
    
    if(env.UNIT_TESTING == 'True')
    {
         stage('Unit Testing')
-   	    {
+   	    {   
+            sh 'cd "${WORKSPACE}"'
+     sh 'pwd'
             sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
             //sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
    	    }
@@ -134,7 +137,8 @@ node
    if(env.CODE_COVERAGE == 'True')
    {
         stage('Code Coverage')
-   	    {	
+   	    {	sh 'cd "${WORKSPACE}"'
+     sh 'pwd'
 	        sh ' $(npm bin)/ng test -- --no-watch --no-progress --code-coverage --browsers Chrome_no_sandbox'
    	    }
    }
@@ -142,7 +146,8 @@ node
    if(env.CODE_QUALITY == 'True')
    {
         stage('Code Quality Analysis')
-        {
+        { sh 'cd "${WORKSPACE}"'
+     sh 'pwd'
             sh 'npm run lint'
         }
    }
@@ -170,17 +175,17 @@ node
  container ('chrome'){
    stage("Functional Testing")
    {
-        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
-        sh 'npm install'
+        sh 'cd "${WORKSPACE}"'
+     sh 'pwd'
         sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
    }
- 
+  }}
    stage("Load Testing")
    {
         sh 'artillery run -o load.json perfTest.yml'
         //sh 'artillery report load.json'  
    }
- }}
+
    stage('Tagging Image for Production')
    {
         openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'prod')
