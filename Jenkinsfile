@@ -83,16 +83,16 @@ def deployApp(projectName,msName){
 }
 
 
-podTemplate(
-    cloud:'openshift',
-    label: 'jenkins-pipeline',
-    serviceAccount: 'jenkins',
-    containers: [
-      containerTemplate(name: 'docker', image: 'docker:18.06', command: 'cat', ttyEnabled: true),
-      containerTemplate(name: 'chrome', image: 'garunski/alpine-chrome:latest', command: 'cat', ttyEnabled: true),
-      containerTemplate(name: 'selenium', image: 'selenium/standalone-chrome:3.14', command: '', ttyEnabled: false, ports: [portMapping(containerPort: 4444)]),
-    ]
-  ){
+podTemplate(cloud: 'openshift', 
+			containers: [
+				containerTemplate(alwaysPullImage: false, command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true, workingDir: '${workspace}'), containerTemplate(alwaysPullImage: false, command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', privileged: false, ttyEnabled: true, workingDir: '${workspace}'), 
+				containerTemplate(alwaysPullImage: false, command: 'cat', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444], privileged: false, ttyEnabled: false, workingDir: '${workspace}')],
+				label: 'jenkins-pipeline', 
+				name: 'jenkins-pipeline', 
+				serviceAccount: 'jenkins', 
+				volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '${workspace}', readOnly: false)], 
+				workspaceVolume: emptyDirWorkspaceVolume(false)) {
+   
 node
 {
    def NODEJS_HOME = tool "NODE_PATH"
