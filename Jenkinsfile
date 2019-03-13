@@ -90,8 +90,8 @@ podTemplate(cloud: 'openshift',
 				label: 'jenkins-pipeline', 
 				name: 'jenkins-pipeline', 
 				serviceAccount: 'jenkins', 
-				volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '/home/jenkins', readOnly: false)], 
-				workspaceVolume: emptyDirWorkspaceVolume(false)) {
+				volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '/home/jenkins', readOnly: false)] 
+				) {
    
 node
 {
