@@ -85,8 +85,9 @@ def deployApp(projectName,msName){
 
 podTemplate(cloud: 'openshift', 
 			containers: [
-				containerTemplate(alwaysPullImage: false, command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true, workingDir: '/tmp'), containerTemplate(alwaysPullImage: false, command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', privileged: false, ttyEnabled: true, workingDir: '/tmp'), 
-				containerTemplate(alwaysPullImage: false, command: 'cat', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444)], privileged: false, ttyEnabled: false, workingDir: '/tmp')],
+				containerTemplate(command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true), 
+        containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', ttyEnabled: true), 
+				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false)],
 				label: 'jenkins-pipeline', 
 				name: 'jenkins-pipeline', 
 				serviceAccount: 'jenkins', 
@@ -115,6 +116,7 @@ node
    stage('Initial Setup')
    {
        sh 'npm install'
+       sh 'pwd'
    }
    
    if(env.UNIT_TESTING == 'True')
