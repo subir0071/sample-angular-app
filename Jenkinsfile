@@ -141,7 +141,7 @@ node
             sh 'npm run lint'
         }
    }
-  }
+  }}
    stage('Dev - Build Application')
    {
        buildApp("${APP_NAME}-dev", "${MS_NAME}")
@@ -161,12 +161,13 @@ node
    {
        deployApp("${APP_NAME}-test", "${MS_NAME}")
    }
+  node ('jenkins-pipeline'){
  container ('chrome'){
    stage("Functional Testing")
    {
         sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
    }
- }
+ }}
    /*stage("Load Testing")
    {
         sh 'artillery run -o load.json perfTest.yml'
@@ -187,6 +188,6 @@ node
    {
        deployApp("${APP_NAME}-prod", "${MS_NAME}")
    }	
-  } 
+  
 }
 }
