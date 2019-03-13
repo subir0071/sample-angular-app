@@ -169,13 +169,13 @@ node
         sh 'npm install'
         sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
    }
- }}
-   /*stage("Load Testing")
+ 
+   stage("Load Testing")
    {
         sh 'artillery run -o load.json perfTest.yml'
         //sh 'artillery report load.json'  
-   }*/
-   
+   }
+ }}
    stage('Tagging Image for Production')
    {
         openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'prod')
