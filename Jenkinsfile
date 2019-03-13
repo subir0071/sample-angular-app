@@ -9,9 +9,8 @@ def readProperties(){
     env.CODE_QUALITY = property.CODE_QUALITY
     env.UNIT_TESTING = property.UNIT_TESTING
     env.CODE_COVERAGE = property.CODE_COVERAGE
-    //env.INTEGRATION_TESTING = property.INTEGRATION_TESTING
-    //env.SECURITY_TESTING = property.SECURITY_TESTING
-    //env.SONAR_PROJECT_KEY = property.SONAR_PROJECT_KEY
+    env.FUNCTIONAL_TESTING = property.FUNCTIONAL_TESTING
+    env.LOAD_TESTING = property.LOAD_TESTING
 }
 
 def firstTimeDevDeployment(projectName,msName){
@@ -86,16 +85,14 @@ def deployApp(projectName,msName){
 podTemplate(cloud: 'openshift', 
 			containers: [
 				containerTemplate(command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true,workingDir:'/var/lib/jenkins'), 
-        containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', ttyEnabled: true,workingDir:'/var/lib/jenkins'), 
+                containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', ttyEnabled: true,workingDir:'/var/lib/jenkins'), 
 				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/var/lib/jenkins')],
-				label: 'jenkins-pipeline', 
-				name: 'jenkins-pipeline', 
-				serviceAccount: 'jenkins', 
-				volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '/var/lib/jenkins', readOnly: false)] 
-				) {
-   
-node
-{
+			label: 'jenkins-pipeline', 
+			name: 'jenkins-pipeline', 
+			serviceAccount: 'jenkins', 
+			volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '/var/lib/jenkins', readOnly: false)] 
+			){
+node{
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
    
@@ -104,101 +101,86 @@ node
         firstTimeDevDeployment("${APP_NAME}-dev", "${MS_NAME}")
         firstTimeTestDeployment("${APP_NAME}-dev", "${APP_NAME}-test", "${MS_NAME}")
         firstTimeProdDeployment("${APP_NAME}-dev", "${APP_NAME}-prod", "${MS_NAME}")
-        
    }
    
-  
-   stage('Checkout')
-   {
+   stage('Checkout'){
        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
-     env.WORKSPACE = "${workspace}"
-   }
-  node ('jenkins-pipeline'){
-  container ('chrome'){
-   stage('Initial Setup')
-   {
-     sh 'cd "${WORKSPACE}"'
-     sh 'pwd'
-       sh 'npm install'
-       sh 'pwd'
-   }
-   
-   if(env.UNIT_TESTING == 'True')
-   {
-        stage('Unit Testing')
-   	    {   
-            sh 'cd "${WORKSPACE}"'
-     sh 'pwd'
-            sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
-            //sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
-   	    }
+       env.WORKSPACE = "${workspace}"
    }
   
-   if(env.CODE_COVERAGE == 'True')
-   {
-        stage('Code Coverage')
-   	    {	sh 'cd "${WORKSPACE}"'
-     sh 'pwd'
-	        sh ' $(npm bin)/ng test -- --no-watch --no-progress --code-coverage --browsers Chrome_no_sandbox'
-   	    }
+   node ('jenkins-pipeline'){
+       container ('chrome'){
+            stage('Initial Setup'){
+                sh 'cd "${WORKSPACE}"'
+                sh 'npm install'
+            }
+   
+            if(env.UNIT_TESTING == 'True'){
+                stage('Unit Testing'){   
+                    sh 'cd "${WORKSPACE}"'
+                    sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
+   	            }
+            }
+  
+            if(env.CODE_COVERAGE == 'True'){
+                stage('Code Coverage'){	
+                    sh 'cd "${WORKSPACE}"'
+	                sh ' $(npm bin)/ng test -- --no-watch --no-progress --code-coverage --browsers Chrome_no_sandbox'
+   	            }
+            }
+   
+            if(env.CODE_QUALITY == 'True'){
+                stage('Code Quality Analysis'){ 
+                    sh 'cd "${WORKSPACE}"'
+                    sh 'npm run lint'
+                }
+            }
+        }
+    }
+   
+   stage('Dev - Build Application'){
+        buildApp("${APP_NAME}-dev", "${MS_NAME}")
+   }
+
+   stage('Dev - Deploy Application'){
+        deployApp("${APP_NAME}-dev", "${MS_NAME}")
    }
    
-   if(env.CODE_QUALITY == 'True')
-   {
-        stage('Code Quality Analysis')
-        { sh 'cd "${WORKSPACE}"'
-     sh 'pwd'
-            sh 'npm run lint'
+   stage('Tagging Image for Testing'){
+        openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'test')
+   }
+   
+   stage('Test - Deploy Application'){
+        deployApp("${APP_NAME}-test", "${MS_NAME}")
+   }
+
+   if(env.FUNCTIONAL_TESTING == 'True'){
+        node ('jenkins-pipeline'){
+            container ('chrome'){
+                stage("Functional Testing"){
+                    sh 'cd "${WORKSPACE}"'
+                    sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
+                }
+            }
         }
    }
-  }}
-   stage('Dev - Build Application')
-   {
-       buildApp("${APP_NAME}-dev", "${MS_NAME}")
+   
+   if(env.LOAD_TESTING == 'True'){
+        stage("Load Testing"){
+            sh 'artillery run -o load.json perfTest.yml' 
+        }
    }
 
-   stage('Dev - Deploy Application')
-   {
-       deployApp("${APP_NAME}-dev", "${MS_NAME}")
-   }
-   
-   stage('Tagging Image for Testing')
-   {
-       openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'test')
-   }
-   
-   stage('Test - Deploy Application')
-   {
-       deployApp("${APP_NAME}-test", "${MS_NAME}")
-   }
-  node ('jenkins-pipeline'){
- container ('chrome'){
-   stage("Functional Testing")
-   {
-        sh 'cd "${WORKSPACE}"'
-     sh 'pwd'
-        sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
-   }
-  }}
-   stage("Load Testing")
-   {
-        sh 'artillery run -o load.json perfTest.yml'
-        //sh 'artillery report load.json'  
-   }
-
-   stage('Tagging Image for Production')
-   {
+   stage('Tagging Image for Production'){
         openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'prod')
    }	
     
-   stage('Deploy to Production approval')
-   {
-       input "Deploy to Production Environment?"
+   stage('Deploy to Production approval'){
+        input "Deploy to Production Environment?"
    }
 	
-   stage('Prod - Deploy Application')
-   {
-       deployApp("${APP_NAME}-prod", "${MS_NAME}")
+   stage('Prod - Deploy Application'){
+        deployApp("${APP_NAME}-prod", "${MS_NAME}")
    }	
   
 }
