@@ -6,7 +6,6 @@ def readProperties(){
     env.MS_NAME = property.MS_NAME
     env.BRANCH = property.BRANCH
     env.GIT_SOURCE_URL = property.GIT_SOURCE_URL
-    //env.SONAR_HOST_URL = property.SONAR_HOST_URL
     env.CODE_QUALITY = property.CODE_QUALITY
     env.UNIT_TESTING = property.UNIT_TESTING
     env.CODE_COVERAGE = property.CODE_COVERAGE
@@ -142,7 +141,7 @@ node
             sh 'npm run lint'
         }
    }
-  
+  }
    stage('Dev - Build Application')
    {
        buildApp("${APP_NAME}-dev", "${MS_NAME}")
@@ -162,12 +161,12 @@ node
    {
        deployApp("${APP_NAME}-test", "${MS_NAME}")
    }
-
+ container ('chrome'){
    stage("Functional Testing")
    {
         sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
    }
-  }
+ }
    /*stage("Load Testing")
    {
         sh 'artillery run -o load.json perfTest.yml'
