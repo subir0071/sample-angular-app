@@ -115,7 +115,7 @@ node{
                 sh 'npm install'
             }
    
-            /*if(env.UNIT_TESTING == 'True'){
+            if(env.UNIT_TESTING == 'True'){
                 stage('Unit Testing'){   
                     sh 'cd "${WORKSPACE}"'
                     sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
@@ -134,7 +134,7 @@ node{
                     sh 'cd "${WORKSPACE}"'
                     sh 'npm run lint'
                 }
-            }*/
+            }
         }
     }
    
@@ -154,7 +154,7 @@ node{
         deployApp("${APP_NAME}-test", "${MS_NAME}")
    }
 
-   /*if(env.FUNCTIONAL_TESTING == 'True'){
+   if(env.FUNCTIONAL_TESTING == 'True'){
         node ('jenkins-pipeline'){
             container ('chrome'){
                 stage("Functional Testing"){
@@ -163,7 +163,7 @@ node{
                 }
             }
         }
-   }*/
+   }
    
    if(env.LOAD_TESTING == 'True'){
         stage("Load Testing"){
