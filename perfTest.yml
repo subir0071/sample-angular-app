@@ -6,6 +6,8 @@ config:
   defaults:
     headers:
       x-my-service-auth: ''
+  ensure:
+    max: 2000
 scenarios:
   - flow:
     - get:
