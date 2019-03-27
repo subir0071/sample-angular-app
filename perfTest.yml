@@ -7,7 +7,7 @@ config:
     headers:
       x-my-service-auth: ''
   ensure:
-    max: 100
+    max: 8000
 scenarios:
   - flow:
     - get:
