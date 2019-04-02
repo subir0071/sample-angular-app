@@ -6,6 +6,7 @@ def readProperties(){
     env.MS_NAME = property.MS_NAME
     env.BRANCH = property.BRANCH
     env.GIT_SOURCE_URL = property.GIT_SOURCE_URL
+    env.GIT_CREDENTIALS = property.GIT_CREDENTIALS
     env.CODE_QUALITY = property.CODE_QUALITY
     env.UNIT_TESTING = property.UNIT_TESTING
     env.CODE_COVERAGE = property.CODE_COVERAGE
@@ -13,53 +14,40 @@ def readProperties(){
     env.LOAD_TESTING = property.LOAD_TESTING
 }
 
-def firstTimeDevDeployment(projectName,msName){
+def devDeployment(projectName,msName){
     openshift.withCluster() {
         openshift.withProject(projectName) {
-            def bcSelector = openshift.selector( "bc", msName)
-            def bcExists = bcSelector.exists()
-            if (!bcExists) {
-                openshift.newApp("${GIT_SOURCE_URL}","--strategy=docker")
-                def rm = openshift.selector("dc", msName).rollout()
-                timeout(15) { 
-                  openshift.selector("dc", msName).related('pods').untilEach(1) {
-                    return (it.object().status.phase == "Running")
-                  }
-                }
-                openshiftTag(namespace: projectName, srcStream: msName, srcTag: 'latest', destStream: msName, destTag: 'test')
-                openshiftTag(namespace: projectName, srcStream: msName, srcTag: 'latest', destStream: msName, destTag: 'prod')
-            } else {
-                sh 'echo build config already exists in development environment'  
+            openshiftDeploy(namespace: projectName,deploymentConfig: msName)
+        } 
+    }
+}
+
+
+def testDeployment(sourceProjectName,destinationProjectName,msName){
+    openshift.withCluster() {
+        openshift.withProject(destinationProjectName){
+	          def dcSelector = openshift.selector( "dc", msName)
+            def dcExists = dcSelector.exists()
+	          if(!dcExists){
+	    	      openshift.newApp(sourceProjectName+"/"+msName+":"+"test")   
+	          }
+            else {
+                openshiftDeploy(namespace: destinationProjectName,deploymentConfig: msName) 
             } 
         }
     }
 }
 
-def firstTimeTestDeployment(sourceProjectName,destinationProjectName,msName){
+def prodDeployment(sourceProjectName,destinationProjectName,msName){
     openshift.withCluster() {
         openshift.withProject(destinationProjectName){
-	    def dcSelector = openshift.selector( "dc", msName)
+	          def dcSelector = openshift.selector( "dc", msName)
             def dcExists = dcSelector.exists()
-	    if(!dcExists){
-	    	openshift.newApp(sourceProjectName+"/"+msName+":"+"test")   
-	    }
+	          if(!dcExists){
+	    	        openshift.newApp(sourceProjectName+"/"+msName+":"+"prod")   
+	          }
             else {
-                sh 'echo deployment config already exists in testing environment'  
-            } 
-        }
-    }
-}
-
-def firstTimeProdDeployment(sourceProjectName,destinationProjectName,msName){
-    openshift.withCluster() {
-        openshift.withProject(destinationProjectName){
-	    def dcSelector = openshift.selector( "dc", msName)
-            def dcExists = dcSelector.exists()
-	    if(!dcExists){
-	    	openshift.newApp(sourceProjectName+"/"+msName+":"+"prod")   
-	    }
-            else {
-                sh 'echo deployment config already exists in production environment'  
+                openshiftDeploy(namespace: destinationProjectName,deploymentConfig: msName)
             } 
         }
     }
@@ -68,7 +56,20 @@ def firstTimeProdDeployment(sourceProjectName,destinationProjectName,msName){
 def buildApp(projectName,msName){
     openshift.withCluster() {
         openshift.withProject(projectName){
-            openshift.startBuild(msName,"--wait")   
+            def bcSelector = openshift.selector( "bc", msName)
+            def bcExists = bcSelector.exists()
+	          if(!bcExists){
+	    	        openshift.newApp("${GIT_SOURCE_URL}","--strategy=docker")
+                def rm = openshift.selector("dc", msName).rollout()
+                timeout(15) { 
+                  openshift.selector("dc", msName).related('pods').untilEach(1) {
+                    return (it.object().status.phase == "Running")
+                  }
+                }  
+	          }
+            else {
+                openshift.startBuild(msName,"--wait")  
+            }    
         }
     }
 }
@@ -85,7 +86,7 @@ def deployApp(projectName,msName){
 podTemplate(cloud: 'openshift', 
 			containers: [
 				containerTemplate(command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true,workingDir:'/var/lib/jenkins'), 
-                containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', ttyEnabled: true,workingDir:'/var/lib/jenkins'), 
+        containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', ttyEnabled: true,workingDir:'/var/lib/jenkins'), 
 				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/var/lib/jenkins')],
 			label: 'jenkins-pipeline', 
 			name: 'jenkins-pipeline', 
@@ -96,15 +97,8 @@ node{
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
    
-   stage('First Time Deployment'){
-        readProperties()
-        firstTimeDevDeployment("${APP_NAME}-dev", "${MS_NAME}")
-        firstTimeTestDeployment("${APP_NAME}-dev", "${APP_NAME}-test", "${MS_NAME}")
-        firstTimeProdDeployment("${APP_NAME}-dev", "${APP_NAME}-prod", "${MS_NAME}")
-   }
-   
    stage('Checkout'){
-       checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
+       checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: "${GIT_CREDENTIALS}", url: "${GIT_SOURCE_URL}"]]])
        env.WORKSPACE = "${workspace}"
    }
   
@@ -143,7 +137,7 @@ node{
    }
 
    stage('Dev - Deploy Application'){
-        deployApp("${APP_NAME}-dev", "${MS_NAME}")
+        devDeployment("${APP_NAME}-dev", "${MS_NAME}")
    }
    
    stage('Tagging Image for Testing'){
@@ -151,7 +145,7 @@ node{
    }
    
    stage('Test - Deploy Application'){
-        deployApp("${APP_NAME}-test", "${MS_NAME}")
+        testDeployment("${APP_NAME}-dev", "${APP_NAME}-test", "${MS_NAME}")
    }
 
    if(env.FUNCTIONAL_TESTING == 'True'){
@@ -180,7 +174,7 @@ node{
    }
 	
    stage('Prod - Deploy Application'){
-        deployApp("${APP_NAME}-prod", "${MS_NAME}")
+        prodDeployment("${APP_NAME}-dev", "${APP_NAME}-prod", "${MS_NAME}")
    }	
   
 }
