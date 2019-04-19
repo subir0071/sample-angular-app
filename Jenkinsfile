@@ -107,6 +107,7 @@ node{
        container ('chrome'){
             stage('Initial Setup'){
                 sh 'cd "${WORKSPACE}"'
+              sh 'ls'
                 sh 'npm install'
             }
    
