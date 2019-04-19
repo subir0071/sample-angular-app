@@ -113,7 +113,8 @@ node{
             if(env.UNIT_TESTING == 'True'){
                 stage('Unit Testing'){   
                     sh 'cd "${WORKSPACE}"'
-                    sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
+                    //sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
+                  sh ' ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
    	            }
             }
   
