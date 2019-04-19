@@ -106,7 +106,7 @@ node{
    }
   
    node ('jenkins-pipeline'){
-       container ('chrome'){
+       container ('docker'){
             stage('Initial Setup'){
                 sh 'docker --version'
                 sh 'cd "${WORKSPACE}"'
