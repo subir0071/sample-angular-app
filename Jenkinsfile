@@ -101,29 +101,28 @@ node{
        readProperties()
        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: "${GIT_CREDENTIALS}", url: "${GIT_SOURCE_URL}"]]])
        env.WORKSPACE = "${workspace}"
-     sh 'npm install'
+       sh 'kubectl version'
+       sh 'docker --version'
    }
   
    node ('jenkins-pipeline'){
        container ('chrome'){
             stage('Initial Setup'){
                 sh 'cd "${WORKSPACE}"'
-              sh 'ls'
                 sh 'npm install'
             }
    
             if(env.UNIT_TESTING == 'True'){
                 stage('Unit Testing'){   
                     sh 'cd "${WORKSPACE}"'
-                    //sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
-                  sh ' ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
+                    sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
    	            }
             }
   
             if(env.CODE_COVERAGE == 'True'){
                 stage('Code Coverage'){	
                     sh 'cd "${WORKSPACE}"'
-	                sh ' $(npm bin)/ng test -- --no-watch --no-progress --code-coverage --browsers Chrome_no_sandbox'
+	                  sh ' $(npm bin)/ng test -- --no-watch --no-progress --code-coverage --browsers Chrome_no_sandbox'
    	            }
             }
    
