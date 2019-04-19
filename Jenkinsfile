@@ -106,8 +106,7 @@ node{
    node ('jenkins-pipeline'){
        container ('chrome'){
             stage('Initial Setup'){
-                sh 'cd "${WORKSPACE}"'
-              sh 'chmod u+rwx package.json'
+                sh 'cd "${WORKSPACE}"
               sh 'ls'
                 sh 'npm install'
             }
