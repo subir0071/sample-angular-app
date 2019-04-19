@@ -101,6 +101,7 @@ node{
        readProperties()
        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: "${GIT_CREDENTIALS}", url: "${GIT_SOURCE_URL}"]]])
        env.WORKSPACE = "${workspace}"
+     sh 'npm install'
    }
   
    node ('jenkins-pipeline'){
