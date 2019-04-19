@@ -107,8 +107,9 @@ node{
        container ('chrome'){
             stage('Initial Setup'){
                 sh 'cd "${WORKSPACE}"'
+              sh 'chmod u+rwx'
               sh 'ls'
-                sh 'sudo npm install'
+                sh 'npm install'
             }
    
             if(env.UNIT_TESTING == 'True'){
