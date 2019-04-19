@@ -108,7 +108,7 @@ node{
             stage('Initial Setup'){
                 sh 'cd "${WORKSPACE}"'
               sh 'ls'
-                sh 'npm install'
+                sh 'sudo npm install'
             }
    
             if(env.UNIT_TESTING == 'True'){
