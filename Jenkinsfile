@@ -107,7 +107,7 @@ node{
        container ('chrome'){
             stage('Initial Setup'){
                 sh 'cd "${WORKSPACE}"'
-              sh 'chmod u+rwx'
+              sh 'chmod u+rwx package.json'
               sh 'ls'
                 sh 'npm install'
             }
