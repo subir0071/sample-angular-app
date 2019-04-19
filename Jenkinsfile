@@ -102,12 +102,13 @@ node{
        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: "${GIT_CREDENTIALS}", url: "${GIT_SOURCE_URL}"]]])
        env.WORKSPACE = "${workspace}"
        sh 'kubectl version'
-       sh 'docker --version'
+       
    }
   
    node ('jenkins-pipeline'){
        container ('chrome'){
             stage('Initial Setup'){
+                sh 'docker --version'
                 sh 'cd "${WORKSPACE}"'
                 sh 'npm install'
             }
