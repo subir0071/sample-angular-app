@@ -106,7 +106,7 @@ node{
    node ('jenkins-pipeline'){
        container ('chrome'){
             stage('Initial Setup'){
-                sh 'cd "${WORKSPACE}"
+                sh 'cd "${WORKSPACE}"'
               sh 'ls'
                 sh 'npm install'
             }
