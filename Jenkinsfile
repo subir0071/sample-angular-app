@@ -102,6 +102,11 @@ node{
        //sh 'kubectl version'
        
    }
+  stage('Apply Kubernetes files') {
+    withKubeConfig([credentialsId: 'default2', serverUrl: 'https://sourabhaks-rgsourabh-45125f-065c67f8.hcp.centralus.azmk8s.io:443']) {
+      sh 'kubectl get pods'
+    }
+  }
   def label = "docker-${UUID.randomUUID().toString()}"
   podTemplate(label: label, yaml: """
 apiVersion: v1
