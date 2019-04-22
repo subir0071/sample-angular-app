@@ -96,8 +96,8 @@ node{
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
    
    stage('Checkout'){
-       readProperties()
        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: "${GIT_CREDENTIALS}", url: "${GIT_SOURCE_URL}"]]])
+       readProperties()
        env.WORKSPACE = "${workspace}"
        sh 'kubectl version'
        
