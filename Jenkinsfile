@@ -103,7 +103,7 @@ node{
        
    }
   
-   node ('jenkins-pipeline'){
+   /*node ('jenkins-pipeline'){
        container ('jnlp-chrome'){
             stage('Initial Setup'){
                 checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
@@ -131,7 +131,7 @@ node{
                 }
             }
         }
-    }
+    }*/
    node ('jenkins-pipeline'){
        container ('jnlp-docker'){
    stage('Dev - Build Application'){
