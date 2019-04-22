@@ -98,7 +98,7 @@ node{
    stage('Checkout'){
        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
        readProperties()
-       env.WORKSPACE = "${workspace}"
+       //env.WORKSPACE = "${workspace}"
        //sh 'kubectl version'
        
    }
@@ -136,7 +136,8 @@ node{
        container ('jnlp-docker'){
    stage('Dev - Build Application'){
         //buildApp("${APP_NAME}-dev", "${MS_NAME}")
-        sh 'docker build -t sample-angular-app:latest .'
+        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+        sh 'docker build -t sample-angular-app:v1 .'
         sh 'docker images'
    }}}
 
