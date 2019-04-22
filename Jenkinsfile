@@ -138,7 +138,7 @@ node{
         //buildApp("${APP_NAME}-dev", "${MS_NAME}")
         checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
        sh 'docker --version'  
-      sh 'docker build -t sample-angular-app:v1 .'
+      sh 'sudo docker build -t sample-angular-app:v1 .'
         sh 'sudo docker images'
    }}}
 
