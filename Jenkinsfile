@@ -104,30 +104,29 @@ node{
    }
   
    node ('jenkins-pipeline'){
-       container ('jnlp-docker'){
+       container ('jnlp-chrome'){
             stage('Initial Setup'){
-                sh 'docker --version'
-                sh 'cd "${WORKSPACE}"'
+                checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
                 sh 'npm install'
             }
    
             if(env.UNIT_TESTING == 'True'){
                 stage('Unit Testing'){   
-                    sh 'cd "${WORKSPACE}"'
+                    //sh 'cd "${WORKSPACE}"'
                     sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
    	            }
             }
   
             if(env.CODE_COVERAGE == 'True'){
                 stage('Code Coverage'){	
-                    sh 'cd "${WORKSPACE}"'
+                    //sh 'cd "${WORKSPACE}"'
 	                  sh ' $(npm bin)/ng test -- --no-watch --no-progress --code-coverage --browsers Chrome_no_sandbox'
    	            }
             }
    
             if(env.CODE_QUALITY == 'True'){
                 stage('Code Quality Analysis'){ 
-                    sh 'cd "${WORKSPACE}"'
+                    //sh 'cd "${WORKSPACE}"'
                     sh 'npm run lint'
                 }
             }
