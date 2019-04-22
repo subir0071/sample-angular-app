@@ -86,8 +86,8 @@ def deployApp(projectName,msName){
 podTemplate(cloud: 'kubernetes', 
 			containers: [
 				containerTemplate(command: 'cat', image: 'docker:18.06', name: 'jnlp-docker', ttyEnabled: true,workingDir:'/home/jenkins'), 
-        containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', ttyEnabled: true,workingDir:'/home/jenkins'), 
-				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/home/jenkins')],
+        containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'jnlp-chrome', ttyEnabled: true,workingDir:'/home/jenkins'), 
+				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'jnlp-selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/home/jenkins')],
 			label: 'jenkins-pipeline', 
 			name: 'jenkins-pipeline'
 			){
@@ -104,7 +104,7 @@ node{
    }
   
    node ('jenkins-pipeline'){
-       container ('docker'){
+       container ('jnlp-docker'){
             stage('Initial Setup'){
                 sh 'docker --version'
                 sh 'cd "${WORKSPACE}"'
