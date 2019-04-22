@@ -99,7 +99,7 @@ node{
        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
        readProperties()
        env.WORKSPACE = "${workspace}"
-       sh 'kubectl version'
+       //sh 'kubectl version'
        
    }
   
