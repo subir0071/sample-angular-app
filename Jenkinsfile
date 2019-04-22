@@ -96,7 +96,7 @@ node{
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
    
    stage('Checkout'){
-       checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: "${GIT_CREDENTIALS}", url: "${GIT_SOURCE_URL}"]]])
+       checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
        readProperties()
        env.WORKSPACE = "${workspace}"
        sh 'kubectl version'
