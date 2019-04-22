@@ -137,7 +137,8 @@ node{
    stage('Dev - Build Application'){
         //buildApp("${APP_NAME}-dev", "${MS_NAME}")
         checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-       sh 'docker --version'  
+       sh 'docker --version' 
+     sh 'docker run -v $(pwd):/usr gcr.io/kaniko-project/executor:latest --dockerfile=. --context=/usr --destination=sourabh385/myapp:50'
      sh 'systemctl start docker'
       sh 'sudo docker build -t sample-angular-app:v1 .'
         sh 'sudo docker images'
