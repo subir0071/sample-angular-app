@@ -134,7 +134,9 @@ node{
     }
    
    stage('Dev - Build Application'){
-        buildApp("${APP_NAME}-dev", "${MS_NAME}")
+        //buildApp("${APP_NAME}-dev", "${MS_NAME}")
+        sh 'docker build -t sample-angular-app:latest .'
+        sh 'docker images'
    }
 
    stage('Dev - Deploy Application'){
