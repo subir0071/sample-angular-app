@@ -85,7 +85,7 @@ def deployApp(projectName,msName){
 
 podTemplate(cloud: 'kubernetes', 
 			containers: [
-				containerTemplate(command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true,workingDir:'/home/jenkins'), 
+				containerTemplate(command: 'cat', image: 'docker:18.06', name: 'jnlp-docker', ttyEnabled: true,workingDir:'/home/jenkins'), 
         containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', ttyEnabled: true,workingDir:'/home/jenkins'), 
 				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/home/jenkins')],
 			label: 'jenkins-pipeline', 
