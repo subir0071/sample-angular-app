@@ -101,7 +101,7 @@ node{
        readProperties() 
     }
    
-   /* node ('jenkins-pipeline'){
+    node ('jenkins-pipeline'){
         container ('jnlp-chrome'){
             stage('Initial Setup'){
                 checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
@@ -127,7 +127,7 @@ node{
             }
         }
     }
-*/
+
     podTemplate(label: 'dockerNode', yaml: """
 apiVersion: v1
 kind: Pod
@@ -185,10 +185,7 @@ podTemplate(label: 'kubectlnode', containers: [
     }
   }
 }
-   /*stage('Dev - Deploy Application'){
-        devDeployment("${APP_NAME}-dev", "${MS_NAME}")
-   }
-   
+   /*
    stage('Tagging Image for Testing'){
         openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'test')
    }
