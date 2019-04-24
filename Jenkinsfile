@@ -156,8 +156,8 @@ spec:
           passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
           sh """
             docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}
-            docker build -t sourabh385/myapp:latest .
-            docker push sourabh385/myapp:latest
+            docker build -t sourabh385/myapp:${gitCommit} .
+            docker push sourabh385/myapp:${gitCommit}
             """
         }
 			}
@@ -179,7 +179,7 @@ podTemplate(label: 'kubectlnode', containers: [
           sh 'kubectl create -f sample-app-kube.yaml'
         }
         else{
-          sh "WEB_IMAGE_NAME='sourabh385/myapp:latest'"
+          sh "WEB_IMAGE_NAME='sourabh385/myapp:${gitCommit}'"
           sh 'kubectl set image deployment/sample-angular-app sample-angular-app=$WEB_IMAGE_NAME'
         }
       }
