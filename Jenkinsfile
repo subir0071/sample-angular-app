@@ -85,7 +85,6 @@ def deployApp(projectName,msName){
 
 podTemplate(cloud: 'kubernetes', 
 			containers: [
-				containerTemplate(command: 'cat', image: 'docker:18.06', name: 'jnlp-docker', ttyEnabled: true,workingDir:'/home/jenkins'), 
         containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'jnlp-chrome', ttyEnabled: true,workingDir:'/home/jenkins'), 
 				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'jnlp-selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/home/jenkins')],
 			label: 'jenkins-pipeline', 
@@ -155,7 +154,19 @@ spec:
 		}
 	}
 }
+
+podTemplate(label: 'kubectlnode', containers: [
+  containerTemplate(name: 'kubectl', image: 'bitnami/kubectl:1.12.8', command: 'cat', ttyEnabled: true)
   
+]) {
+  node('kubectlnode') {
+    stage('Dev - Deploy Application') {
+      container('kubectl') {
+        sh "kubectl get pods"
+      }
+    }
+  }
+}
    /*stage('Dev - Deploy Application'){
         devDeployment("${APP_NAME}-dev", "${MS_NAME}")
    }
