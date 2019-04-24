@@ -93,6 +93,8 @@ podTemplate(cloud: 'kubernetes',
 node{
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
+   def myRepo = checkout scm
+   def gitCommit = myRepo.GIT_COMMIT
    
     stage('Checkout'){
        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
@@ -148,8 +150,16 @@ spec:
 		stage('Dev - Build Application') {
 			container('docker') {
 				checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-				sh "docker build -t myapp:v1 ."
-				sh "docker images"
+        withCredentials([[$class: 'UsernamePasswordMultiBinding',
+          credentialsId: 'dockerhub',
+          usernameVariable: 'DOCKER_HUB_USER',
+          passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+          sh """
+            docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}
+            docker build -t sourabh385/myapp:${gitCommit} .
+            docker push sourabh385/myapp:${gitCommit}
+            """
+        }
 			}
 		}
 	}
