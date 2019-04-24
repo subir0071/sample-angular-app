@@ -166,13 +166,15 @@ spec:
 }
 
 podTemplate(label: 'kubectlnode', containers: [
-  containerTemplate(name: 'kubectl', image: 'bitnami/kubectl:1.12.8', command: 'cat', ttyEnabled: true)
+  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true)
   
 ]) {
   node('kubectlnode') {
     stage('Dev - Deploy Application') {
       container('kubectl') {
+        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
         sh "kubectl get pods"
+        sh "kubectl create -f sample-app-kube.yaml"
       }
     }
   }
