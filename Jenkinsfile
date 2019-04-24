@@ -180,7 +180,7 @@ podTemplate(label: 'kubectlnode', containers: [
         }
         else{
           sh "WEB_IMAGE_NAME='sourabh385/myapp:${gitCommit}'"
-          sh 'kubectl set image deployment/sample-angular-app sample-angular-app=$WEB_IMAGE_NAME'
+          sh "kubectl set image deployment/sample-angular-app sample-angular-app=${WEB_IMAGE_NAME}"
         }
       }
     }
