@@ -101,7 +101,7 @@ node{
        readProperties() 
     }
    
-    node ('jenkins-pipeline'){
+   /* node ('jenkins-pipeline'){
         container ('jnlp-chrome'){
             stage('Initial Setup'){
                 checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
@@ -127,7 +127,7 @@ node{
             }
         }
     }
-
+*/
     podTemplate(label: 'dockerNode', yaml: """
 apiVersion: v1
 kind: Pod
@@ -156,8 +156,8 @@ spec:
           passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
           sh """
             docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}
-            docker build -t sourabh385/myapp:${gitCommit} .
-            docker push sourabh385/myapp:${gitCommit}
+            docker build -t sourabh385/myapp:latest .
+            docker push sourabh385/myapp:latest
             """
         }
 			}
@@ -179,7 +179,7 @@ podTemplate(label: 'kubectlnode', containers: [
           sh 'kubectl create -f sample-app-kube.yaml'
         }
         else{
-          sh "WEB_IMAGE_NAME='sourabh385/myapp:${gitCommit}'"
+          sh "WEB_IMAGE_NAME='sourabh385/myapp:latest'"
           sh 'kubectl set image deployment/sample-angular-app sample-angular-app=$WEB_IMAGE_NAME'
         }
       }
