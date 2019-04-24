@@ -95,20 +95,39 @@ node{
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
    
-   stage('Checkout'){
+    stage('Checkout'){
        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-       readProperties()
-       //env.WORKSPACE = "${workspace}"
-       //sh 'kubectl version'
-       
-   }
-  stage('Apply Kubernetes files') {
-    withKubeConfig([credentialsId: 'default2', serverUrl: 'https://sourabhaks-rgsourabh-45125f-065c67f8.hcp.centralus.azmk8s.io:443']) {
-      sh 'kubectl get pods'
+       readProperties() 
     }
-  }
-  def label = "docker-${UUID.randomUUID().toString()}"
-  podTemplate(label: label, yaml: """
+   
+    node ('jenkins-pipeline'){
+        container ('jnlp-chrome'){
+            stage('Initial Setup'){
+                checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+                sh 'npm install'
+            }
+   
+            if(env.UNIT_TESTING == 'True'){
+                stage('Unit Testing'){
+                    sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
+   	            }
+            }
+  
+            if(env.CODE_COVERAGE == 'True'){
+                stage('Code Coverage'){
+	                sh ' $(npm bin)/ng test -- --no-watch --no-progress --code-coverage --browsers Chrome_no_sandbox'
+   	            }
+            }
+   
+            if(env.CODE_QUALITY == 'True'){
+                stage('Code Quality Analysis'){ 
+                    sh 'npm run lint'
+                }
+            }
+        }
+    }
+
+    podTemplate(label: 'docker', yaml: """
 apiVersion: v1
 kind: Pod
 spec:
@@ -125,65 +144,23 @@ spec:
     hostPath:
       path: /var/run/docker.sock
 """
-  ) {
-
-  def image = "jenkins/jnlp-slave"
-  node(label) {
-    stage('Build Docker image') {
-      git 'https://github.com/jenkinsci/docker-jnlp-slave.git'
-      container('docker') {
-        sh "docker build -t ${image} ."
-      }
-    }
-  }
+  ){
+    node(label) {
+		stage('Dev - Build Application') {
+			container('docker') {
+				checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+				sh "docker build -t myapp:v1 ."
+				sh "docker images"
+			}
+		}
+	}
 }
   
-   /*node ('jenkins-pipeline'){
-       container ('jnlp-chrome'){
-            stage('Initial Setup'){
-                checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-                sh 'npm install'
-            }
-   
-            if(env.UNIT_TESTING == 'True'){
-                stage('Unit Testing'){   
-                    //sh 'cd "${WORKSPACE}"'
-                    sh ' $(npm bin)/ng test -- --no-watch --no-progress --browsers Chrome_no_sandbox'
-   	            }
-            }
-  
-            if(env.CODE_COVERAGE == 'True'){
-                stage('Code Coverage'){	
-                    //sh 'cd "${WORKSPACE}"'
-	                  sh ' $(npm bin)/ng test -- --no-watch --no-progress --code-coverage --browsers Chrome_no_sandbox'
-   	            }
-            }
-   
-            if(env.CODE_QUALITY == 'True'){
-                stage('Code Quality Analysis'){ 
-                    //sh 'cd "${WORKSPACE}"'
-                    sh 'npm run lint'
-                }
-            }
-        }
-    }*/
-   node ('jenkins-pipeline'){
-       container ('jnlp-docker'){
-   stage('Dev - Build Application'){
-        //buildApp("${APP_NAME}-dev", "${MS_NAME}")
-        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-       sh 'docker --version' 
-     sh 'docker run -v $(pwd):/usr gcr.io/kaniko-project/executor:latest --dockerfile=. --context=/usr --destination=sourabh385/myapp:50'
-     sh 'systemctl start docker'
-      sh 'sudo docker build -t sample-angular-app:v1 .'
-        sh 'sudo docker images'
-   }}}
-
-   stage('Dev - Deploy Application'){
+   /*stage('Dev - Deploy Application'){
         devDeployment("${APP_NAME}-dev", "${MS_NAME}")
    }
    
-   /*stage('Tagging Image for Testing'){
+   stage('Tagging Image for Testing'){
         openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'test')
    }
    
