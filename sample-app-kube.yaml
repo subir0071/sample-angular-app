@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: sample-angular-app
-        image: docker.io/sourabh385/myapp:latest
+        image: docker.io/sourabh385/myapp
         ports:
         - containerPort: 80
       imagePullSecrets:
