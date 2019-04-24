@@ -176,6 +176,9 @@ podTemplate(label: 'kubectlnode', containers: [
         sh (script: 'kubectl get deployment sample-angular-app > result',
            returnStatus: true)
         def CHECK_DEPLOYMENT=readFile('result').trim()
+        sh "echo ${CHECK_DEPLOYMENT}"
+        def qwerty=CHECK_DEPLOYMENT.contains('Error')
+        sh "echo ${qwerty}"
         if(CHECK_DEPLOYMENT.contains('Error')){
           sh 'kubectl get pods'
         }
