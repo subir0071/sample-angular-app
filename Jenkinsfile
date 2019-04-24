@@ -127,7 +127,7 @@ node{
         }
     }
 
-    podTemplate(label: 'docker', yaml: """
+    podTemplate(label: 'dockerNode', yaml: """
 apiVersion: v1
 kind: Pod
 spec:
@@ -145,7 +145,7 @@ spec:
       path: /var/run/docker.sock
 """
   ){
-    node(label) {
+    node('dockerNode') {
 		stage('Dev - Build Application') {
 			container('docker') {
 				checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
