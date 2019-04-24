@@ -19,6 +19,8 @@ spec:
         image: docker.io/sourabh385/myapp:latest
         ports:
         - containerPort: 80
+      imagePullSecrets:
+      - name: regcred
 ---
 apiVersion: v1
 kind: Service
