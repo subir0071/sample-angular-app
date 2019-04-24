@@ -175,7 +175,6 @@ podTemplate(label: 'kubectlnode', containers: [
         checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
         sh "kubectl get deployment | grep sample-angular-app > result"
         def CHECK_DEPLOYMENT=readFile('result').trim()
-        CHECK_DEPLOYMENT = sh( script:'kubectl get deployment | grep sample-angular-app').trim()
         if(${CHECK_DEPLOYMENT} == ''){
           sh 'kubectl get pods'
         }
