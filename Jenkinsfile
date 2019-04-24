@@ -100,7 +100,7 @@ node{
        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
        readProperties() 
     }
-   /*
+   
     node ('jenkins-pipeline'){
         container ('jnlp-chrome'){
             stage('Initial Setup'){
@@ -163,7 +163,7 @@ spec:
 			}
 		}
 	}
-}*/
+}
 
 podTemplate(label: 'kubectlnode', containers: [
   containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true)
