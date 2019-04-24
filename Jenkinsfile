@@ -100,7 +100,7 @@ node{
        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
        readProperties() 
     }
-   
+   /*
     node ('jenkins-pipeline'){
         container ('jnlp-chrome'){
             stage('Initial Setup'){
@@ -163,7 +163,7 @@ spec:
 			}
 		}
 	}
-}
+}*/
 
 podTemplate(label: 'kubectlnode', containers: [
   containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true)
@@ -173,8 +173,16 @@ podTemplate(label: 'kubectlnode', containers: [
     stage('Dev - Deploy Application') {
       container('kubectl') {
         checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-        sh "kubectl get pods"
-        sh "kubectl create -f sample-app-kube.yaml"
+        CHECK_DEPLOYMENT = sh ( script: 'kubectl get deployment | grep sample-angular-app')
+        if(CHECK_DEPLOYMENT == ''){
+          sh 'kubectl get pods'
+        }
+        else{
+          sh 'kubectl get svc'
+        }
+        //sh "kubectl create -f sample-app-kube.yaml"
+        //sh "WEB_IMAGE_NAME='sourabh385/myapp:${gitCommit}'"
+        //sh "kubectl set image deployment/sample-angular-app sample-angular-app=$WEB_IMAGE_NAME"
       }
     }
   }
