@@ -173,7 +173,7 @@ podTemplate(label: 'kubectlnode', containers: [
     stage('Dev - Deploy Application') {
       container('kubectl') {
         checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-        CHECK_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app > result',
+        CHECK_DEPLOYMENT = sh (script: 'kubectl get deployment  > result',
            returnStatus: true)
         sh "echo ${CHECK_DEPLOYMENT}"
         if(CHECK_DEPLOYMENT == 1){
