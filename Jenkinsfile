@@ -173,7 +173,7 @@ podTemplate(label: 'kubectlnode', containers: [
     stage('Dev - Deploy Application') {
       container('kubectl') {
         checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-        CHECK_DEPLOYMENT = sh (script: 'kubectl get deployment  > result',
+        CHECK_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app',
            returnStatus: true)
         if(CHECK_DEPLOYMENT == 1){
           sh 'kubectl create -f sample-app-kube.yaml'
@@ -182,9 +182,6 @@ podTemplate(label: 'kubectlnode', containers: [
           sh "WEB_IMAGE_NAME='sourabh385/myapp:${gitCommit}'"
           sh 'kubectl set image deployment/sample-angular-app sample-angular-app=$WEB_IMAGE_NAME'
         }
-        //sh "kubectl create -f sample-app-kube.yaml"
-        //sh "WEB_IMAGE_NAME='sourabh385/myapp:${gitCommit}'"
-        //sh "kubectl set image deployment/sample-angular-app sample-angular-app=$WEB_IMAGE_NAME"
       }
     }
   }
