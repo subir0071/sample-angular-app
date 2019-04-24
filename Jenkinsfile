@@ -179,8 +179,7 @@ podTemplate(label: 'kubectlnode', containers: [
           sh 'kubectl create -f sample-app-kube.yaml'
         }
         else{
-          sh "WEB_IMAGE_NAME='sourabh385/myapp:${gitCommit}'"
-          sh "kubectl set image deployment/sample-angular-app sample-angular-app=${WEB_IMAGE_NAME}"
+          sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit}"
         }
       }
     }
