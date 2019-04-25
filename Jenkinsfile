@@ -142,9 +142,9 @@ podTemplate(label: 'kubectlnode', containers: [
 
    if(env.FUNCTIONAL_TESTING == 'True'){
         node ('jenkins-pipeline'){
-            container ('chrome'){
+            container ('jnlp-chrome'){
                 stage("Functional Testing"){
-                    sh 'cd "${WORKSPACE}"'
+                    checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
                     sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
                 }
             }
