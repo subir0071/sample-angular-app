@@ -14,78 +14,9 @@ def readProperties(){
     env.LOAD_TESTING = property.LOAD_TESTING
 }
 
-def devDeployment(projectName,msName){
-    openshift.withCluster() {
-        openshift.withProject(projectName) {
-            openshiftDeploy(namespace: projectName,deploymentConfig: msName)
-        } 
-    }
-}
-
-
-def testDeployment(sourceProjectName,destinationProjectName,msName){
-    openshift.withCluster() {
-        openshift.withProject(destinationProjectName){
-	          def dcSelector = openshift.selector( "dc", msName)
-            def dcExists = dcSelector.exists()
-	          if(!dcExists){
-	    	      openshift.newApp(sourceProjectName+"/"+msName+":"+"test")   
-	          }
-            else {
-                openshiftDeploy(namespace: destinationProjectName,deploymentConfig: msName) 
-            } 
-        }
-    }
-}
-
-def prodDeployment(sourceProjectName,destinationProjectName,msName){
-    openshift.withCluster() {
-        openshift.withProject(destinationProjectName){
-	          def dcSelector = openshift.selector( "dc", msName)
-            def dcExists = dcSelector.exists()
-	          if(!dcExists){
-	    	        openshift.newApp(sourceProjectName+"/"+msName+":"+"prod")   
-	          }
-            else {
-                openshiftDeploy(namespace: destinationProjectName,deploymentConfig: msName)
-            } 
-        }
-    }
-}
-
-def buildApp(projectName,msName){
-    openshift.withCluster() {
-        openshift.withProject(projectName){
-            def bcSelector = openshift.selector( "bc", msName)
-            def bcExists = bcSelector.exists()
-	          if(!bcExists){
-	    	        openshift.newApp("${GIT_SOURCE_URL}","--strategy=docker")
-                def rm = openshift.selector("dc", msName).rollout()
-                timeout(15) { 
-                  openshift.selector("dc", msName).related('pods').untilEach(1) {
-                    return (it.object().status.phase == "Running")
-                  }
-                }  
-	          }
-            else {
-                openshift.startBuild(msName,"--wait")  
-            }    
-        }
-    }
-}
-
-def deployApp(projectName,msName){
-    openshift.withCluster() {
-        openshift.withProject(projectName){
-            openshiftDeploy(namespace: projectName,deploymentConfig: msName)
-        }
-    }
-}
-
-
 podTemplate(cloud: 'kubernetes', 
 			containers: [
-        containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'jnlp-chrome', ttyEnabled: true,workingDir:'/home/jenkins'), 
+                containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'jnlp-chrome', ttyEnabled: true,workingDir:'/home/jenkins'), 
 				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'jnlp-selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/home/jenkins')],
 			label: 'jenkins-pipeline', 
 			name: 'jenkins-pipeline'
@@ -93,11 +24,13 @@ podTemplate(cloud: 'kubernetes',
 node{
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
-   def myRepo = checkout scm
-   def gitCommit = myRepo.GIT_COMMIT
+   //def myRepo = checkout scm
+   //def gitCommit = myRepo.GIT_COMMIT
    
     stage('Checkout'){
-       checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+       //checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+       def myRepo = checkout scm
+       def gitCommit = myRepo.GIT_COMMIT
        readProperties() 
     }
    
@@ -150,16 +83,16 @@ spec:
 		stage('Dev - Build Application') {
 			container('docker') {
 				checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-        withCredentials([[$class: 'UsernamePasswordMultiBinding',
-          credentialsId: 'dockerhub',
-          usernameVariable: 'DOCKER_HUB_USER',
-          passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
-          sh """
-            docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}
-            docker build -t sourabh385/myapp:${gitCommit} .
-            docker push sourabh385/myapp:${gitCommit}
-            """
-        }
+                withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'DOCKER_HUB_USER',
+                    passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+                        sh """
+                                docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}
+                                docker build -t sourabh385/myapp:${gitCommit} .
+                                docker push sourabh385/myapp:${gitCommit}
+                        """
+                    }
 			}
 		}
 	}
@@ -173,26 +106,39 @@ podTemplate(label: 'kubectlnode', containers: [
     stage('Dev - Deploy Application') {
       container('kubectl') {
         checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-        CHECK_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app',
-           returnStatus: true)
-        if(CHECK_DEPLOYMENT == 1){
-          sh 'kubectl create -f sample-app-kube.yaml'
+        CHECK_DEV_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n dev', returnStatus: true)
+        if(CHECK_DEV_DEPLOYMENT == 1){
+          //Create new deployment and service  
+          sh 'kubectl create -f sample-app-kube.yaml -n dev'
         }
         else{
-          sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit}"
+          //Update previous deployment with new image  
+          sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit} -n dev"
+        }
+      }
+    }
+
+    stage('Deploy to test environment?'){
+        input "Deploy to Testing Environment?"
+    }
+
+    stage('Test - Deploy Application') {
+      container('kubectl') {
+        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+        CHECK_TEST_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n test', returnStatus: true)
+        if(CHECK_TEST_DEPLOYMENT == 1){
+          //Create new deployment and service  
+          sh 'kubectl create -f sample-app-kube.yaml -n test'
+        }
+        else{
+          //Update previous deployment with new image  
+          sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit} -n test"
         }
       }
     }
   }
 }
-   /*
-   stage('Tagging Image for Testing'){
-        openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'test')
-   }
    
-   stage('Test - Deploy Application'){
-        testDeployment("${APP_NAME}-dev", "${APP_NAME}-test", "${MS_NAME}")
-   }
 
    if(env.FUNCTIONAL_TESTING == 'True'){
         node ('jenkins-pipeline'){
@@ -210,18 +156,31 @@ podTemplate(label: 'kubectlnode', containers: [
             sh 'artillery run -o load.json perfTest.yml' 
         }
    }
-
-   stage('Tagging Image for Production'){
-        openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'prod')
-   }	
-    
-   stage('Deploy to Production approval'){
+   
+   podTemplate(label: 'kubectlnode', containers: [
+  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true)
+  
+]) {
+  node('kubectlnode') {
+    stage('Deploy to prod environment?'){
         input "Deploy to Production Environment?"
-   }
-	
-   stage('Prod - Deploy Application'){
-        prodDeployment("${APP_NAME}-dev", "${APP_NAME}-prod", "${MS_NAME}")
-   }	
-  */
+    }
+
+    stage('Prod - Deploy Application') {
+      container('kubectl') {
+        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+        CHECK_PROD_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n prod', returnStatus: true)
+        if(CHECK_PROD_DEPLOYMENT == 1){
+          //Create new deployment and service  
+          sh 'kubectl create -f sample-app-kube.yaml -n prod'
+        }
+        else{
+          //Update previous deployment with new image  
+          sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit} -n prod"
+        }
+      }
+    }
+  }
+}
 }
 }
