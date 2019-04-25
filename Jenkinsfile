@@ -99,9 +99,9 @@ spec:
 }
 
 podTemplate(label: 'kubectlnode', containers: [
-  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir: '/var/jenkins_home'),
+  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir: '/var/jenkins_home')],
   volumes: [persistentVolumeClaim(claimName: 'jenkins-home', mountPath: '/var/jenkins_home', readOnly: false)]
-]) {
+) {
   node('kubectlnode') {
     stage('Dev - Deploy Application') {
       container('kubectl') {
