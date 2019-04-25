@@ -16,8 +16,8 @@ def readProperties(){
 
 podTemplate(cloud: 'kubernetes', 
 			containers: [
-                containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'jnlp-chrome', ttyEnabled: true,workingDir:'/var/jenkins_home'), 
-				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'jnlp-selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/var/jenkins_home')],
+                containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'jnlp-chrome', ttyEnabled: true, workingDir: '/var/jenkins_home'), 
+				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'jnlp-selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false, workingDir: '/var/jenkins_home')],
 			label: 'jenkins-pipeline', 
 			name: 'jenkins-pipeline',
       volumes: [persistentVolumeClaim(claimName: 'jenkins-home', mountPath: '/var/jenkins_home', readOnly: false)]       
@@ -99,7 +99,7 @@ spec:
 }
 
 podTemplate(label: 'kubectlnode', containers: [
-  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir:'/var/jenkins_home'),
+  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir: '/var/jenkins_home'),
   volumes: [persistentVolumeClaim(claimName: 'jenkins-home', mountPath: '/var/jenkins_home', readOnly: false)]
 ]) {
   node('kubectlnode') {
