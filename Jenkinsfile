@@ -16,16 +16,15 @@ def readProperties(){
 
 podTemplate(cloud: 'kubernetes', 
 			containers: [
-                containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'jnlp-chrome', ttyEnabled: true,workingDir:'/home/jenkins'), 
-				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'jnlp-selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/home/jenkins')],
+                containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'jnlp-chrome', ttyEnabled: true,workingDir:'/var/jenkins_home'), 
+				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'jnlp-selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false,workingDir:'/var/jenkins_home')],
 			label: 'jenkins-pipeline', 
-			name: 'jenkins-pipeline'
+			name: 'jenkins-pipeline',
+      volumes: [persistentVolumeClaim(claimName: 'jenkins-home', mountPath: '/var/jenkins_home', readOnly: false)]       
 			){
 node{
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
-   //def myRepo = checkout scm
-   //def gitCommit = myRepo.GIT_COMMIT
    
     stage('Checkout'){
        //checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
@@ -37,8 +36,9 @@ node{
     node ('jenkins-pipeline'){
         container ('jnlp-chrome'){
             stage('Initial Setup'){
-                checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-                sh 'npm install'
+                //checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+              sh 'ls -ltr'  
+              sh 'npm install'
             }
    
             if(env.UNIT_TESTING == 'True'){
@@ -99,8 +99,8 @@ spec:
 }
 
 podTemplate(label: 'kubectlnode', containers: [
-  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true)
-  
+  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir:'/var/jenkins_home'),
+  volumes: [persistentVolumeClaim(claimName: 'jenkins-home', mountPath: '/var/jenkins_home', readOnly: false)]
 ]) {
   node('kubectlnode') {
     stage('Dev - Deploy Application') {
