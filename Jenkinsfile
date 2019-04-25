@@ -20,7 +20,7 @@ podTemplate(cloud: 'kubernetes',
 				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'jnlp-selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false, workingDir: '/var/jenkins_home')],
 			label: 'jenkins-pipeline', 
 			name: 'jenkins-pipeline',
-      volumes: [persistentVolumeClaim(claimName: 'jenkins-home', mountPath: '/var/jenkins_home', readOnly: false)]       
+      volumes: [hostPathVolume(hostPath: '/var/jenkins_home', mountPath: '/var/jenkins_home')]       
 			){
 node{
    def NODEJS_HOME = tool "NODE_PATH"
@@ -100,7 +100,7 @@ spec:
 
 podTemplate(label: 'kubectlnode', containers: [
   containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir: '/var/jenkins_home')],
-  volumes: [persistentVolumeClaim(claimName: 'jenkins-home', mountPath: '/var/jenkins_home', readOnly: false)]
+  volumes: [hostPathVolume(hostPath: '/var/jenkins_home', mountPath: '/var/jenkins_home')]
 ) {
   node('kubectlnode') {
     stage('Dev - Deploy Application') {
