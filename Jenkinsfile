@@ -16,18 +16,16 @@ def readProperties(){
 
 podTemplate(cloud: 'kubernetes', 
 			containers: [
-                containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'jnlp-chrome', ttyEnabled: true, workingDir: '/var/jenkins_home'), 
-				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'jnlp-selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false, workingDir: '/var/jenkins_home')],
+                containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'jnlp-chrome', ttyEnabled: true, workingDir: '/home/jenkins'), 
+				containerTemplate(command: '', image: 'selenium/standalone-chrome:3.14', name: 'jnlp-selenium', ports: [portMapping(containerPort: 4444)], ttyEnabled: false, workingDir: '/home/jenkins')],
 			label: 'jenkins-pipeline', 
-			name: 'jenkins-pipeline',
-      volumes: [hostPathVolume(hostPath: '/var/jenkins_home', mountPath: '/var/jenkins_home')]       
+			name: 'jenkins-pipeline'  
 			){
 node{
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
    
     stage('Checkout'){
-       //checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
        def myRepo = checkout scm
        env.gitCommit = myRepo.GIT_COMMIT
        readProperties() 
@@ -36,8 +34,7 @@ node{
     node ('jenkins-pipeline'){
         container ('jnlp-chrome'){
             stage('Initial Setup'){
-                //checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
-              sh 'ls -ltr'  
+              checkout scm
               sh 'npm install'
             }
    
@@ -99,13 +96,12 @@ spec:
 }
 
 podTemplate(label: 'kubectlnode', containers: [
-  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir: '/var/jenkins_home')],
-  volumes: [hostPathVolume(hostPath: '/var/jenkins_home', mountPath: '/var/jenkins_home')]
+  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir: '/home/jenkins')]
 ) {
   node('kubectlnode') {
     stage('Dev - Deploy Application') {
       container('kubectl') {
-        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+        checkout scm
         CHECK_DEV_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n dev', returnStatus: true)
         if(CHECK_DEV_DEPLOYMENT == 1){
           //Create new deployment and service  
@@ -124,7 +120,7 @@ podTemplate(label: 'kubectlnode', containers: [
 
     stage('Test - Deploy Application') {
       container('kubectl') {
-        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+        checkout scm
         CHECK_TEST_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n test', returnStatus: true)
         if(CHECK_TEST_DEPLOYMENT == 1){
           //Create new deployment and service  
@@ -144,7 +140,8 @@ podTemplate(label: 'kubectlnode', containers: [
         node ('jenkins-pipeline'){
             container ('jnlp-chrome'){
                 stage("Functional Testing"){
-                    checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+                    checkout scm
+                    sh 'npm install'
                     sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
                 }
             }
@@ -168,7 +165,7 @@ podTemplate(label: 'kubectlnode', containers: [
 
     stage('Prod - Deploy Application') {
       container('kubectl') {
-        checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
+        checkout scm
         CHECK_PROD_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n prod', returnStatus: true)
         if(CHECK_PROD_DEPLOYMENT == 1){
           //Create new deployment and service  
