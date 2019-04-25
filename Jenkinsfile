@@ -30,7 +30,7 @@ node{
     stage('Checkout'){
        //checkout([$class: 'GitSCM', branches: [[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/sourabhgupta385/sample-angular-app"]]])
        def myRepo = checkout scm
-       def gitCommit = myRepo.GIT_COMMIT
+       env.gitCommit = myRepo.GIT_COMMIT
        readProperties() 
     }
    
