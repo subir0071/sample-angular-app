@@ -28,10 +28,11 @@ node{
     stage('Checkout'){
        def myRepo = checkout scm
        env.gitCommit = myRepo.GIT_COMMIT
-       readProperties() 
+       readProperties()
+      println(myRepo)
     }
    
-    node ('jenkins-pipeline'){
+    /*node ('jenkins-pipeline'){
         container ('jnlp-chrome'){
             stage('Initial Setup'){
               checkout scm
@@ -178,6 +179,6 @@ podTemplate(label: 'kubectlnode', containers: [
       }
     }
   }
-}
+}*/
 }
 }
