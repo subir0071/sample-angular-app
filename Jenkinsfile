@@ -33,9 +33,6 @@ node{
        println(myRepo)
     }
   
-     
- /*
-   
     node ('jenkins-pipeline'){
         container ('jnlp-chrome'){
             stage('Initial Setup'){
@@ -62,7 +59,6 @@ node{
             }
         }
     }
-
     podTemplate(label: 'dockerNode', yaml: """
 apiVersion: v1
 kind: Pod
@@ -91,15 +87,14 @@ spec:
                     passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
                         sh """
                                 docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}
-                                docker build -t sourabh385/myapp:${gitCommit} .
-                                docker push sourabh385/myapp:${gitCommit}
+                                docker build -t ${DOCKER_HUB_USER}/myapp:${gitCommit} .
+                                docker push ${DOCKER_HUB_USER}/myapp:${gitCommit}
                         """
                     }
 			}
 		}
 	}
 }
-
   
   
   
@@ -107,89 +102,94 @@ podTemplate(label: 'kubectlnode', containers: [
   containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir: '/home/jenkins')]
 ) {
   node('kubectlnode') {
+    
     if("${gitBranch}" == "developer1" || "${gitBranch}" == "feature1"){
-    stage('Dev - Deploy Application') {
-      container('kubectl') {
-        checkout scm
-        CHECK_DEV_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n dev', returnStatus: true)
-        if(CHECK_DEV_DEPLOYMENT == 1){
-          //Create new deployment and service  
-          sh 'kubectl create -f sample-app-kube.yaml -n dev'
-        }
-        else{
-          //Update previous deployment with new image  
-          sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit} -n dev"
-        }
-      }
-    }
-    }
-    if("${gitBranch}" == "development1"){
-    stage('Deploy to test environment?'){
-        input "Deploy to Testing Environment?"
-    }
-
-    stage('Test - Deploy Application') {
-      container('kubectl') {
-        checkout scm
-        CHECK_TEST_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n test', returnStatus: true)
-        if(CHECK_TEST_DEPLOYMENT == 1){
-          //Create new deployment and service  
-          sh 'kubectl create -f sample-app-kube.yaml -n test'
-        }
-        else{
-          //Update previous deployment with new image  
-          sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit} -n test"
-        }
-      }
-    }
-    }
-  }
-}
-  if("${gitBranch}" == "development1"){
-
-   if(env.FUNCTIONAL_TESTING == 'True'){
-        node ('jenkins-pipeline'){
-            container ('jnlp-chrome'){
-                stage("Functional Testing"){
-                    checkout scm
-                    sh 'npm install'
-                    sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
+        
+        stage('Dev - Deploy Application') {
+            container('kubectl') {
+                checkout scm
+                CHECK_DEV_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n dev', returnStatus: true)
+                if(CHECK_DEV_DEPLOYMENT == 1){
+                    //Create new deployment and service  
+                    sh 'kubectl create -f sample-app-kube.yaml -n dev'
+                }
+                else{
+                    //Update previous deployment with new image  
+                    sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit} -n dev"
                 }
             }
         }
-   }
+    }
+    
+    if("${gitBranch}" == "development1"){
+        
+        stage('Deploy to test environment?'){
+            input "Deploy to Testing Environment?"
+        }
+        
+        stage('Test - Deploy Application') {
+            container('kubectl') {
+                checkout scm
+                CHECK_TEST_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n test', returnStatus: true)
+                if(CHECK_TEST_DEPLOYMENT == 1){
+                    //Create new deployment and service  
+                    sh 'kubectl create -f sample-app-kube.yaml -n test'
+                }
+                else{
+                    //Update previous deployment with new image  
+                    sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit} -n test"
+                }
+            }
+        }
+    }
+  }
+}
+        if("${gitBranch}" == "development1"){
+            if(env.FUNCTIONAL_TESTING == 'True'){
+                node ('jenkins-pipeline'){
+                    container ('jnlp-chrome'){
+                        stage("Functional Testing"){
+                            checkout scm
+                            sh 'npm install'
+                            sh '$(npm bin)/ng e2e -- --protractor-config=e2e/protractor.conf.js'
+                        }
+                    }
+                }
+            }
    
-   if(env.LOAD_TESTING == 'True'){
-        stage("Load Testing"){
-            sh 'artillery run -o load.json perfTest.yml' 
+            if(env.LOAD_TESTING == 'True'){
+                stage("Load Testing"){
+                    sh 'artillery run -o load.json perfTest.yml' 
+                }
+            }
         }
-   }
-  }
-  if("${gitBranch}" == "master"){
-   podTemplate(label: 'kubectlnode', containers: [
-  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true)
   
-]) {
-  node('kubectlnode') {
-    stage('Deploy to prod environment?'){
-        input "Deploy to Production Environment?"
-    }
-
-    stage('Prod - Deploy Application') {
-      container('kubectl') {
-        checkout scm
-        CHECK_PROD_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n prod', returnStatus: true)
-        if(CHECK_PROD_DEPLOYMENT == 1){
-          //Create new deployment and service  
-          sh 'kubectl create -f sample-app-kube.yaml -n prod'
+        if("${gitBranch}" == "master"){
+            podTemplate(label: 'kubectlnode', containers: [
+                containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true)
+            ]) {
+                    node('kubectlnode') {
+                        
+                        stage('Deploy to prod environment?'){
+                            input "Deploy to Production Environment?"
+                        }
+                        
+                        stage('Prod - Deploy Application') {
+                            container('kubectl') {
+                                checkout scm
+                                CHECK_PROD_DEPLOYMENT = sh (script: 'kubectl get deployment sample-angular-app -n prod', returnStatus: true)
+                                if(CHECK_PROD_DEPLOYMENT == 1){
+                                    //Create new deployment and service  
+                                    sh 'kubectl create -f sample-app-kube.yaml -n prod'
+                                }
+                                else{
+                                    //Update previous deployment with new image  
+                                    sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit} -n prod"
+                                }
+                            }
+                        }
+                    }
+            }
         }
-        else{
-          //Update previous deployment with new image  
-          sh "kubectl set image deployment/sample-angular-app sample-angular-app=sourabh385/myapp:${gitCommit} -n prod"
-        }
-      }
-    }
-  }
-   }}*/
 }
 }
