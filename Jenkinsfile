@@ -121,7 +121,7 @@ podTemplate(label: 'kubectlnode', containers: [
         }
     }
     
-    if("${gitBranch}" == "development1"){
+    if("${gitBranch}" == "development"){
         
         stage('Deploy to test environment?'){
             input "Deploy to Testing Environment?"
@@ -144,7 +144,7 @@ podTemplate(label: 'kubectlnode', containers: [
     }
   }
 }
-        if("${gitBranch}" == "development1"){
+        if("${gitBranch}" == "development"){
             if(env.FUNCTIONAL_TESTING == 'True'){
                 node ('jenkins-pipeline'){
                     container ('jnlp-chrome'){
