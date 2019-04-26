@@ -32,13 +32,10 @@ node{
        readProperties()
        println(myRepo)
     }
-  if("${gitBranch}" == "master"){
-     stage('Checkout'){
-       
-       println("${gitBranch}")
-    }
-  }
-   /*
+  
+     
+ /*
+   
     node ('jenkins-pipeline'){
         container ('jnlp-chrome'){
             stage('Initial Setup'){
@@ -104,10 +101,13 @@ spec:
 }
 
   
+  
+  
 podTemplate(label: 'kubectlnode', containers: [
   containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir: '/home/jenkins')]
 ) {
   node('kubectlnode') {
+    if("${gitBranch}" == "developer1" || "${gitBranch}" == "feature1"){
     stage('Dev - Deploy Application') {
       container('kubectl') {
         checkout scm
@@ -122,7 +122,8 @@ podTemplate(label: 'kubectlnode', containers: [
         }
       }
     }
-
+    }
+    if("${gitBranch}" == "development1"){
     stage('Deploy to test environment?'){
         input "Deploy to Testing Environment?"
     }
@@ -141,9 +142,10 @@ podTemplate(label: 'kubectlnode', containers: [
         }
       }
     }
+    }
   }
 }
-   
+  if("${gitBranch}" == "development1"){
 
    if(env.FUNCTIONAL_TESTING == 'True'){
         node ('jenkins-pipeline'){
@@ -162,7 +164,8 @@ podTemplate(label: 'kubectlnode', containers: [
             sh 'artillery run -o load.json perfTest.yml' 
         }
    }
-   
+  }
+  if("${gitBranch}" == "master"){
    podTemplate(label: 'kubectlnode', containers: [
   containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true)
   
@@ -187,6 +190,6 @@ podTemplate(label: 'kubectlnode', containers: [
       }
     }
   }
-}*/
+   }}*/
 }
 }
