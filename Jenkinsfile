@@ -28,11 +28,18 @@ node{
     stage('Checkout'){
        def myRepo = checkout scm
        env.gitCommit = myRepo.GIT_COMMIT
+       env.gitBranch = myRepo.GIT_BRANCH
        readProperties()
-      println(myRepo)
+       println(myRepo)
     }
-   
-    /*node ('jenkins-pipeline'){
+  if("${gitBranch}" == "master"){
+     stage('Checkout'){
+       
+       println("${gitBranch}")
+    }
+  }
+   /*
+    node ('jenkins-pipeline'){
         container ('jnlp-chrome'){
             stage('Initial Setup'){
               checkout scm
@@ -96,6 +103,7 @@ spec:
 	}
 }
 
+  
 podTemplate(label: 'kubectlnode', containers: [
   containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir: '/home/jenkins')]
 ) {
