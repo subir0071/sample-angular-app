@@ -8,5 +8,5 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'my-app';
   company = 'ADMCOE';
-  branch = 'developer1 is sourabh gupta from ADM';
+  heading = 'Hello World!!'
 }
