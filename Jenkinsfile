@@ -95,8 +95,20 @@ spec:
 		}
 	}
 }
+  stage('Create Pull Request'){
+    withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                    credentialsId: 'git_sourabh',
+                    usernameVariable: 'GITT_USER',
+                    passwordVariable: 'GITT_PASSWORD']]) {
+        sh """
+                curl -u "${GITT_USER}:${GITT_PASSWORD}" -d '{"title": "Amazing new feature", "body": "Please pull this in!", "head": "sourabhgupta385:feature", "base": "master"}' https://api.github.com/repos/sourabhgupta385/sample-angular-app/pulls
+           
+           """     
+                       
+                        
+    }
   
-  if("${gitBranch}" == "developer1" || "${gitBranch}" == "feature1" || "${gitBranch}" == "development"){
+  /*if("${gitBranch}" == "developer1" || "${gitBranch}" == "feature1" || "${gitBranch}" == "development"){
     stage('Create Pull Request'){
         sh 'git request-pull feature1 ./'
     }
@@ -107,7 +119,7 @@ podTemplate(label: 'kubectlnode', containers: [
 ) {
   node('kubectlnode') {
     
-    if("${gitBranch}" == "developer1" || "${gitBranch}" == "feature1"){
+    if("${gitBranch}" == "feature"){
         
         stage('Dev - Deploy Application') {
             container('kubectl') {
@@ -194,6 +206,6 @@ podTemplate(label: 'kubectlnode', containers: [
                         }
                     }
             }
-        }
+        }*/
 }
 }
