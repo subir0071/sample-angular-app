@@ -96,7 +96,11 @@ spec:
 	}
 }
   
-  
+  if("${gitBranch}" == "developer1" || "${gitBranch}" == "feature1" || "${gitBranch}" == "development"){
+    stage('Create Pull Request'){
+        sh 'git request-pull feature1 ./'
+    }
+  }
   
 podTemplate(label: 'kubectlnode', containers: [
   containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true, workingDir: '/home/jenkins')]
