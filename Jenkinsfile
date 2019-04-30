@@ -105,7 +105,7 @@ spec:
            
            """     
                        
-                        
+     }               
     }
   
   /*if("${gitBranch}" == "developer1" || "${gitBranch}" == "feature1" || "${gitBranch}" == "development"){
