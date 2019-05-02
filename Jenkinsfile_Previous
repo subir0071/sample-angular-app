@@ -83,7 +83,7 @@ def deployApp(projectName,msName){
 }
 
 
-podTemplate(cloud: 'openshift', 
+/*podTemplate(cloud: 'openshift', 
 			containers: [
 				containerTemplate(command: 'cat', image: 'docker:18.06', name: 'docker', ttyEnabled: true,workingDir:'/var/lib/jenkins'), 
         containerTemplate(command: 'cat', image: 'garunski/alpine-chrome:latest', name: 'chrome', ttyEnabled: true,workingDir:'/var/lib/jenkins'), 
@@ -92,7 +92,7 @@ podTemplate(cloud: 'openshift',
 			name: 'jenkins-pipeline', 
 			serviceAccount: 'jenkins', 
 			volumes: [persistentVolumeClaim(claimName: 'jenkins', mountPath: '/var/lib/jenkins', readOnly: false)] 
-			){
+			){*/
 node{
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
@@ -179,4 +179,4 @@ node{
    }	
   
 }
-}
+// }
