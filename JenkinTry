@@ -1,3 +1,4 @@
+def label = "worker-${UUID.randomUUID().toString()}"
 def readProperties(){
 	def properties_file_path = "${workspace}" + "/properties.yml"
 	def property = readYaml file: properties_file_path
@@ -86,7 +87,7 @@ def deployApp(projectName,msName){
         }
     }
 }
-node{
+node(label){
    def NODEJS_HOME = tool "NODE_PATH"
    env.PATH="${env.PATH}:${NODEJS_HOME}/bin"
    
