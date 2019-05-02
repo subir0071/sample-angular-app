@@ -1,10 +1,15 @@
-APP_NAME: 'angular-demo'
-MS_NAME: 'sample-angular-app'
+APP_NAME: 'node-demo'
+MS_NAME: 'ms-node-app'
 BRANCH: 'master'
-GIT_SOURCE_URL: 'https://github.com/sourabhgupta385/sample-angular-app.git'
+GIT_SOURCE_URL: 'https://github.com/lohitj/ms-node-app.git'
 GIT_CREDENTIALS: 'abcdefghihjklmn'
 CODE_QUALITY: 'True'
 UNIT_TESTING: 'True'
 CODE_COVERAGE: 'True'
 FUNCTIONAL_TESTING: 'True'
+SECURITY_TESTING: 'True'
 LOAD_TESTING: 'True'
+LINE : 10
+FUNCTION : 10
+BRANCHES : 10
+SECURITY_GATING : 7
