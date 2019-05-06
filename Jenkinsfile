@@ -95,7 +95,7 @@ spec:
 		}
 	}
 }
-  
+  //code to create pull request
   if("${gitBranch}" == "developer1" || "${gitBranch}" == "feature1" || "${gitBranch}" == "development"){
     stage('Create Pull Request'){
         sh 'git request-pull feature1 ./'
