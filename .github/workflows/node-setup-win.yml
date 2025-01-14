@@ -13,10 +13,7 @@ jobs:
         
       - name: Set up Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: '16.x'  # Specify the version you want to install
-          cache: 'npm'  # Enable caching for npm dependencies (optional but recommended)
-      
+        
       - name: Install dependencies
         run: npm -version
         shell: pwsh  # PowerShell is the default shell on Windows runners
