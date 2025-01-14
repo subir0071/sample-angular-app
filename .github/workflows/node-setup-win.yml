@@ -1,0 +1,23 @@
+name: Node.js Setup on Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-node:
+    runs-on: windows-latest  # Change to Windows runner
+    
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'  # Specify the version you want to install
+          cache: 'npm'  # Enable caching for npm dependencies (optional but recommended)
+      
+      - name: Install dependencies
+        run: npm -version
+        shell: pwsh  # PowerShell is the default shell on Windows runners
+        
