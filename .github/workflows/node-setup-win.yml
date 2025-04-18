@@ -5,7 +5,7 @@ on:
 
 jobs:
   setup-node:
-    runs-on: windows-latest  # Change to Windows runner
+    runs-on: ubuntu-22.04  # Change to Windows runner
     
     steps:
       - name: Check out repository
