@@ -15,6 +15,6 @@ jobs:
         uses: actions/setup-node@v4
         
       - name: Install dependencies
-        run: npm -version
-        shell: pwsh  # PowerShell is the default shell on Windows runners
+        run: npm ci
+        
         
