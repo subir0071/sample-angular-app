@@ -1,0 +1,26 @@
+name: NX Push on Develop
+
+on:
+  workflow_dispatch:
+
+jobs:
+  nx-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # Adjust to your project's Node version
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run target=push branch=develop
+        run: npx nx affected --target=push --parallel=3 --configuration=develop
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
