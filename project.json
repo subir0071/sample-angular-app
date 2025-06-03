@@ -1,0 +1,16 @@
+{
+  "name": "my-app",
+  "targets": {
+    "push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo pushing project"
+      },
+      "configurations": {
+        "develop": {
+          "command": "echo pushing project in develop config"
+        }
+      }
+    }
+  }
+}
