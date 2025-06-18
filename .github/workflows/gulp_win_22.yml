@@ -23,4 +23,4 @@ jobs:
         run: npm install -g @angular/cli gulp
 
       - name: Build with Gulp and Angular CLI
-        run: gulp build && ng build --configuration production
+        run: npx gulp build && npx ng build --configuration production
