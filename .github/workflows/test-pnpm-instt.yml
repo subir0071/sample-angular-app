@@ -1,0 +1,30 @@
+name: Test pnpm Installation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-pnpm:
+    name: Install and Test pnpm on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-2022, windows-2025, ubuntu-22.04, ubuntu-24.04]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9 
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Print pnpm version
+        run: pnpm --version
